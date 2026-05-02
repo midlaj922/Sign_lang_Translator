@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Sign Language Recognition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .dashboard {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .dashboard-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5em;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .logo-text p {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-btn:not(.active):hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        .welcome-section h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-section p {
+            font-size: 1.3em;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .feature-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .feature-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .feature-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stat-item h4 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-item p {
+            color: #666;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .welcome-section h2 {
+                font-size: 2em;
+            }
+
+            .welcome-section p {
+                font-size: 1.1em;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="dashboard-content">
+            <div class="logo">
+                <span class="logo-icon">🤟</span>
+                <div class="logo-text">
+                    <h1>Sign Language Recognition</h1>
+                    <p>Advanced AI-Powered Communication</p>
+                </div>
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="{{ url_for('home') }}" class="nav-btn active">Home</a>
+                <a href="{{ url_for('sign_to_text') }}" class="nav-btn">Sign to Text</a>
+                <a href="{{ url_for('speech_to_text') }}" class="nav-btn">Audio to Text</a>
+                <a href="{{ url_for('about') }}" class="nav-btn">About Us</a>
+                <a href="{{ url_for('logout') }}" class="nav-btn logout-btn">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-section">
+            <h2>Welcome to Sign Language Recognition System</h2>
+            <p>Transform hand gestures into text and speech using cutting-edge AI technology. Our system recognizes American Sign Language (ASL) gestures in real-time, making communication more accessible and inclusive.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🤟</span>
+                <h3>Sign to Text Conversion</h3>
+                <p>Convert hand gestures into text in real-time using advanced computer vision and machine learning algorithms. Supports all ASL letters and common gestures.</p>
+                <a href="{{ url_for('sign_to_text') }}" class="feature-btn">Start Recognition</a>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🎤</span>
+                <h3>Speech to Text Conversion</h3>
+                <p>Convert spoken language to text using advanced speech recognition technology. Upload audio/video or record live with automatic translation to 3 Indian languages.</p>
+                <a href="{{ url_for('speech_to_text') }}" class="feature-btn">Start Converting</a>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🔊</span>
+                <h3>Text to Speech</h3>
+                <p>Convert recognized text into natural-sounding speech, making the system accessible for both deaf and hearing users.</p>
+                <a href="{{ url_for('sign_to_text') }}" class="feature-btn">Try It Now</a>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h3>System Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>26</h4>
+                    <p>ASL Letters Supported</p>
+                </div>
+                <div class="stat-item">
+                    <h4>99%</h4>
+                    <p>Recognition Accuracy</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Real-time</h4>
+                    <p>Processing Speed</p>
+                </div>
+                <div class="stat-item">
+                    <h4>AI-Powered</h4>
+                    <p>Machine Learning</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

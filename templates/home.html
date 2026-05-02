@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Sign Language Recognition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0e7ff 0%, #e9d5ff 50%, #ddd6fe 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Purple Wave Background */
+        .bg-pattern {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60vh;
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+            clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%);
+            z-index: 0;
+            animation: waveFloat 8s ease-in-out infinite;
+        }
+
+        .bg-pattern::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #8b5cf6 100%);
+            clip-path: polygon(0 60%, 100% 40%, 100% 100%, 0 100%);
+            z-index: -1;
+            animation: waveFloat 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes waveFloat {
+            0%, 100% {
+                clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%);
+            }
+            50% {
+                clip-path: polygon(0 30%, 100% 30%, 100% 100%, 0 100%);
+            }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5em;
+            line-height: 1;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .logo-text p {
+            color: #6b7280;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: transparent;
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: transparent;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-section h2 {
+            font-size: 3.5em;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            color: #4b5563;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 35px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.2s; }
+        .feature-card:nth-child(2) { animation-delay: 0.4s; }
+        .feature-card:nth-child(3) { animation-delay: 0.6s; }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            display: block;
+            margin-bottom: 25px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: #1f2937;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }
+
+        .feature-btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .feature-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Tech Stack Section */
+        .tech-section {
+            background: white;
+            border-radius: 24px;
+            padding: 50px 40px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            text-align: center;
+            margin-bottom: 60px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .tech-section h3 {
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .tech-item {
+            padding: 25px;
+            background: #f9fafb;
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .tech-item h4 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .tech-item p {
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                padding: 10px 20px;
+                font-size: 0.85em;
+            }
+
+            .hero-section h2 {
+                font-size: 2.5em;
+            }
+
+            .hero-section p {
+                font-size: 1.1em;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .tech-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .main-content {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+
+    <!-- Flash Messages (Hidden, will be shown as alerts) -->
+    <div style="display: none;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo-section">
+                <span class="logo-icon">🤟</span>
+                <div class="logo-text">
+                    <h1>Sign Language AI</h1>
+                    <p>Advanced Recognition System</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}" class="nav-btn active">Home</a>
+                <a href="{{ url_for('sign_to_text') }}" class="nav-btn">Sign to Text</a>
+                <a href="{{ url_for('speech_to_text') }}" class="nav-btn">Audio to Text</a>
+                <a href="{{ url_for('about') }}" class="nav-btn">About</a>
+                <a href="{{ url_for('logout') }}" class="nav-btn logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2>Next-Gen Communication</h2>
+            <p>Transform hand gestures into text and speech using cutting-edge AI technology. Our neural network recognizes American Sign Language (ASL) gestures in real-time, making communication more accessible and inclusive for everyone.</p>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">26</span>
+                    <span class="stat-label">ASL Letters</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">99%</span>
+                    <span class="stat-label">Accuracy</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">Real-time</span>
+                    <span class="stat-label">Processing</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Cards -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🤟</span>
+                <h3>Sign to Text</h3>
+                <p>Advanced computer vision and deep learning algorithms convert hand gestures into text in real-time. Supports all ASL letters with 99% accuracy.</p>
+                <a href="{{ url_for('sign_to_text') }}" class="feature-btn">Launch Scanner</a>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🎤</span>
+                <h3>Speech to Text</h3>
+                <p>Convert spoken language to text using advanced speech recognition. Upload audio/video or record live with automatic translation to 3 Indian languages.</p>
+                <a href="{{ url_for('speech_to_text') }}" class="feature-btn">Start Recording</a>
+            </div>
+
+            <div class="feature-card">
+                <span class="feature-icon">🔊</span>
+                <h3>Text to Speech</h3>
+                <p>Convert recognized text into natural-sounding speech with our neural TTS engine, making the system accessible for both deaf and hearing users.</p>
+                <a href="{{ url_for('sign_to_text') }}" class="feature-btn">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <section class="tech-section">
+            <h3>POWERED BY AI</h3>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h4>🧠</h4>
+                    <p>Deep Learning</p>
+                </div>
+                <div class="tech-item">
+                    <h4>👁️</h4>
+                    <p>Computer Vision</p>
+                </div>
+                <div class="tech-item">
+                    <h4>⚡</h4>
+                    <p>Real-time Processing</p>
+                </div>
+                <div class="tech-item">
+                    <h4>🎯</h4>
+                    <p>High Accuracy</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

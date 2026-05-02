@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Sign Language Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0e7ff 0%, #e9d5ff 50%, #ddd6fe 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60vh;
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+            clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%);
+            z-index: -1;
+            animation: waveFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes waveFloat {
+            0%, 100% { clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%); }
+            50% { clip-path: polygon(0 30%, 100% 30%, 100% 100%, 0 100%); }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5em;
+            line-height: 1;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .logo-text p {
+            color: #6b7280;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: transparent;
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: transparent;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .about-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .about-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-section p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature-item {
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-item h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .tech-stack {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .tech-stack h3 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .tech-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-5px);
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .tech-item h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .tech-item p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .team-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .team-section h3 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .team-member {
+            display: inline-block;
+            margin: 20px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            min-width: 200px;
+        }
+
+        .team-member h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .team-member p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .about-section {
+                padding: 30px 20px;
+            }
+
+            .about-section h2 {
+                font-size: 2em;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+
+            .tech-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo-section">
+                <span class="logo-icon">🤟</span>
+                <div class="logo-text">
+                    <h1>Sign Language AI</h1>
+                    <p>Advanced Recognition System</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}" class="nav-btn">Home</a>
+                <a href="{{ url_for('sign_to_text') }}" class="nav-btn">Sign to Text</a>
+                <a href="{{ url_for('speech_to_text') }}" class="nav-btn">Audio to Text</a>
+                <a href="{{ url_for('about') }}" class="nav-btn active">About</a>
+                <a href="{{ url_for('logout') }}" class="nav-btn logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="about-section">
+            <h2>About Our Project</h2>
+            <p>
+                The Sign Language Recognition System is an innovative web application that bridges the communication gap between deaf and hearing communities. 
+                Using cutting-edge computer vision and machine learning technologies, our system can recognize American Sign Language (ASL) gestures in real-time 
+                and convert them into text and speech.
+            </p>
+            <p>
+                This project was developed with the goal of making communication more accessible and inclusive. By leveraging advanced AI algorithms, 
+                we've created a system that can accurately recognize hand gestures and provide instant feedback, making it easier for deaf individuals 
+                to communicate with those who may not understand sign language.
+            </p>
+            <p>
+                Our system supports all 26 letters of the ASL alphabet and provides real-time processing with high accuracy. The application features 
+                a user-friendly interface, secure authentication, and seamless integration of multiple technologies to deliver a comprehensive solution.
+            </p>
+        </div>
+
+        <div class="features-list">
+            <div class="feature-item">
+                <h4>🎯 Real-time Recognition</h4>
+                <p>Process hand gestures in real-time with minimal latency, providing instant feedback and text conversion.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🤖 AI-Powered</h4>
+                <p>Utilizes advanced machine learning models trained on thousands of hand gesture samples for high accuracy.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔒 Secure Authentication</h4>
+                <p>User accounts with secure login system to personalize the experience and save preferences.</p>
+            </div>
+            <div class="feature-item">
+                <h4>📱 Responsive Design</h4>
+                <p>Works seamlessly across desktop, tablet, and mobile devices with an intuitive user interface.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔊 Text-to-Speech</h4>
+                <p>Convert recognized text into natural-sounding speech for enhanced accessibility.</p>
+            </div>
+            <div class="feature-item">
+                <h4>💡 Word Suggestions</h4>
+                <p>Intelligent word completion and suggestions to improve typing speed and accuracy.</p>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h3>Technology Stack</h3>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h4>Python</h4>
+                    <p>Backend Development</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Flask</h4>
+                    <p>Web Framework</p>
+                </div>
+                <div class="tech-item">
+                    <h4>OpenCV</h4>
+                    <p>Computer Vision</p>
+                </div>
+                <div class="tech-item">
+                    <h4>MediaPipe</h4>
+                    <p>Hand Detection</p>
+                </div>
+                <div class="tech-item">
+                    <h4>TensorFlow</h4>
+                    <p>Machine Learning</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Keras</h4>
+                    <p>Neural Networks</p>
+                </div>
+                <div class="tech-item">
+                    <h4>SQLite</h4>
+                    <p>Database</p>
+                </div>
+                <div class="tech-item">
+                    <h4>HTML/CSS/JS</h4>
+                    <p>Frontend</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="team-section">
+            <h3>Development Team</h3>
+            <div class="team-member">
+                <h4>AI Development Team</h4>
+                <p>Machine Learning & Computer Vision Specialists</p>
+            </div>
+            <div class="team-member">
+                <h4>Web Development Team</h4>
+                <p>Full-Stack Web Application Developers</p>
+            </div>
+            <div class="team-member">
+                <h4>UI/UX Team</h4>
+                <p>User Interface & Experience Designers</p>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</body>
+</html>

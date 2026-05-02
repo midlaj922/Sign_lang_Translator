@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sign Language Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0e7ff 0%, #e9d5ff 50%, #ddd6fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60vh;
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+            clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%);
+            z-index: -1;
+            animation: waveFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes waveFloat {
+            0%, 100% { clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%); }
+            50% { clip-path: polygon(0 30%, 100% 30%, 100% 100%, 0 100%); }
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            max-height: 95vh;
+            overflow-y: auto;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            animation: gradientShift 3s ease infinite;
+            background-size: 200% auto;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .signup-link a {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .signup-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #8b5cf6;
+            transition: width 0.3s ease;
+        }
+
+        .signup-link a:hover::after {
+            width: 100%;
+        }
+
+        .signup-link a:hover {
+            color: #7c3aed;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .back-link a {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-link a:hover {
+            color: #8b5cf6;
+        }
+
+        .back-link a::before {
+            content: '←';
+            font-size: 1.2em;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .flash-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .hand-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <span class="hand-icon">🤟</span>
+            <h1>Sign Language</h1>
+            <p>Recognition System</p>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+
+        <div class="signup-link">
+            <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up here</a></p>
+        </div>
+
+        <div class="back-link">
+            <a href="{{ url_for('landing') }}">Back to Home</a>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</body>
+</html>

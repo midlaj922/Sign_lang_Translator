@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language to Text Conversion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0e7ff 0%, #e9d5ff 50%, #ddd6fe 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60vh;
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+            clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%);
+            z-index: -1;
+            animation: waveFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes waveFloat {
+            0%, 100% { clip-path: polygon(0 40%, 100% 20%, 100% 100%, 0 100%); }
+            50% { clip-path: polygon(0 30%, 100% 30%, 100% 100%, 0 100%); }
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5em;
+            line-height: 1;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .logo-text p {
+            color: #6b7280;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: transparent;
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: transparent;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            flex: 1;
+            padding: 25px 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Each section panel — cleaner card look */
+        .panel {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .panel:hover {
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.15);
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Panel title spacing */
+        .panel-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* Video & Skeleton sections more balanced */
+        .video-container,
+        .skeleton-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            flex: 1;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-container {
+            border: 3px solid #8b5cf6;
+            background: linear-gradient(45deg, #faf5ff, #f3e8ff);
+        }
+
+        .skeleton-container {
+            border: 3px solid #a78bfa;
+            background: linear-gradient(45deg, #f5f3ff, #ede9fe);
+        }
+
+        /* Mirror video for natural camera view */
+        .video-container video {
+            transform: scaleX(-1);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Hand detection indicator */
+        .hand-indicator {
+            background: rgba(139, 92, 246, 0.15);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #8b5cf6;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .hand-indicator.left-hand {
+            background: rgba(167, 139, 250, 0.15);
+            border-color: rgba(167, 139, 250, 0.3);
+            color: #a78bfa;
+        }
+
+        .no-hand-message {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        /* Text and placeholders better centered */
+        .camera-placeholder,
+        .skeleton-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 1.1em;
+            opacity: 0.85;
+            gap: 10px;
+        }
+
+        /* Prediction / text area spacing */
+        .prediction-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        /* Character display block */
+        .character-display {
+            background: #faf5ff;
+            border: 2px solid #8b5cf6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .character-value {
+            font-size: 3.5em;
+            color: #8b5cf6;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* Sentence display block */
+        .sentence-display {
+            background: #faf5ff;
+            border: 2px solid #8b5cf6;
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .sentence-value {
+            font-size: 1.2em;
+            color: #222;
+            line-height: 1.5;
+            word-break: break-word;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Suggestion buttons more breathing space */
+        .suggestions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .suggestion-btn {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #4b5563;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .suggestion-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .suggestion-btn:hover::before {
+            left: 100%;
+        }
+
+        .suggestion-btn:hover {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            border-color: #8b5cf6;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+        }
+
+/* Control buttons spaced and centered */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Start/Stop/Clear buttons with enhanced gradients */
+.start-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.start-btn:hover {
+    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.stop-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.stop-btn:hover {
+    box-shadow: 0 6px 25px rgba(239, 68, 68, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.speak-btn {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.speak-btn:hover {
+    box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.clear-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.clear-btn:hover {
+    box-shadow: 0 6px 25px rgba(245, 158, 11, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+button:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+/* Status messages aligned cleanly */
+.status {
+    text-align: center;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 1200px) {
+    .main-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .prediction-container {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 15px;
+    }
+
+    .suggestions {
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo-section">
+                <span class="logo-icon">🤟</span>
+                <div class="logo-text">
+                    <h1>Sign Language AI</h1>
+                    <p>Advanced Recognition System</p>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}" class="nav-btn">Home</a>
+                <a href="{{ url_for('sign_to_text') }}" class="nav-btn active">Sign to Text</a>
+                <a href="{{ url_for('speech_to_text') }}" class="nav-btn">Audio to Text</a>
+                <a href="{{ url_for('about') }}" class="nav-btn">About</a>
+                <a href="{{ url_for('logout') }}" class="nav-btn logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container">
+         <div class="panel">
+             <div class="panel-title">Live Camera Feed</div>
+             <div class="video-container">
+                 <video id="video" autoplay muted style="display: none;"></video>
+                 <div id="cameraPlaceholder" class="camera-placeholder">
+                     <div class="icon">📷</div>
+                     <div>Click "Start Camera" to begin</div>
+                 </div>
+             </div>
+             <div class="controls">
+                 <button id="startBtn" class="start-btn">Start Camera</button>
+                 <button id="stopBtn" class="stop-btn" disabled>Stop Camera</button>
+             </div>
+         </div>
+        
+         <div class="panel">
+             <div class="panel-title">Processed Hand Skeleton</div>
+             <div class="skeleton-container">
+                 <img id="processedImage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Processed hand skeleton will appear here" style="display: none;">
+                 <div id="skeletonPlaceholder" class="skeleton-placeholder">
+                     <div class="icon">⚙️</div>
+                     <div>Hand detection will appear here</div>
+                 </div>
+                 <div id="noHandMessage" class="no-hand-message" style="display: none;">No hand detected</div>
+             </div>
+         </div>
+        
+        <div class="panel prediction-container">
+            <div id="handIndicator" class="hand-indicator" style="display: none;">
+                Detecting: <span id="handType">Auto</span>
+            </div>
+            <div class="character-display">
+                <div class="character-label">Current Character:</div>
+                <div id="characterDisplay" class="character-value">C</div>
+            </div>
+            
+            <div class="sentence-display">
+                <div class="sentence-label">Sentence:</div>
+                <div id="sentenceDisplay" class="sentence-value"> </div>
+            </div>
+            
+            <div class="suggestions">
+                <button id="suggestion1" class="suggestion-btn"> </button>
+                <button id="suggestion2" class="suggestion-btn"> </button>
+                <button id="suggestion3" class="suggestion-btn"> </button>
+                <button id="suggestion4" class="suggestion-btn"> </button>
+            </div>
+            
+            <div class="controls">
+                <button id="speakBtn" class="speak-btn">Speak</button>
+                <button id="clearBtn" class="clear-btn">Clear</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="status" class="status info" style="display: none;">
+        Ready to start
+    </div>
+    
+
+    <script>
+        class SignLanguageApp {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.speakBtn = document.getElementById('speakBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.characterDisplay = document.getElementById('characterDisplay');
+                this.sentenceDisplay = document.getElementById('sentenceDisplay');
+                 this.processedImage = document.getElementById('processedImage');
+                 this.noHandMessage = document.getElementById('noHandMessage');
+                 this.cameraPlaceholder = document.getElementById('cameraPlaceholder');
+                 this.skeletonPlaceholder = document.getElementById('skeletonPlaceholder');
+                 this.status = document.getElementById('status');
+                 this.handIndicator = document.getElementById('handIndicator');
+                 this.handType = document.getElementById('handType');
+                
+                this.suggestionBtns = [
+                    document.getElementById('suggestion1'),
+                    document.getElementById('suggestion2'),
+                    document.getElementById('suggestion3'),
+                    document.getElementById('suggestion4')
+                ];
+                
+                this.stream = null;
+                this.isProcessing = false;
+                this.processingInterval = null;
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startCamera());
+                this.stopBtn.addEventListener('click', () => this.stopCamera());
+                this.speakBtn.addEventListener('click', () => this.speak());
+                this.clearBtn.addEventListener('click', () => this.clear());
+                
+                this.suggestionBtns.forEach((btn, index) => {
+                    btn.addEventListener('click', () => this.useSuggestion(index));
+                });
+            }
+            
+            async startCamera() {
+                try {
+                    this.showStatus('Starting camera...', 'info');
+                    
+                    // Check if we're on HTTPS or localhost
+                    const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                    
+                    if (!isSecure) {
+                        this.showStatus('Camera access requires HTTPS or localhost. Please use https://localhost:5000', 'error');
+                        return;
+                    }
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: 640, 
+                            height: 480,
+                            facingMode: 'user'
+                        } 
+                    });
+                    
+                     this.video.srcObject = this.stream;
+                     this.video.style.display = 'block';
+                     this.cameraPlaceholder.style.display = 'none';
+                     this.startBtn.disabled = true;
+                     this.stopBtn.disabled = false;
+                    
+                    // Start processing after a short delay
+                    setTimeout(() => {
+                        this.startProcessing();
+                    }, 1000);
+                    
+                    this.showStatus('Camera started successfully', 'success');
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    let errorMessage = 'Error accessing camera: ' + error.message;
+                    
+                    if (error.name === 'NotAllowedError') {
+                        errorMessage = 'Camera access denied. Please allow camera permissions and refresh the page.';
+                    } else if (error.name === 'NotFoundError') {
+                        errorMessage = 'No camera found. Please connect a camera and try again.';
+                    } else if (error.name === 'NotSupportedError') {
+                        errorMessage = 'Camera not supported. Please use a modern browser with camera support.';
+                    } else if (error.name === 'NotReadableError') {
+                        errorMessage = 'Camera is being used by another application. Please close other apps using the camera.';
+                    }
+                    
+                    this.showStatus(errorMessage, 'error');
+                }
+            }
+            
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+                
+                 this.video.srcObject = null;
+                 this.video.style.display = 'none';
+                 this.cameraPlaceholder.style.display = 'flex';
+                 this.startBtn.disabled = false;
+                 this.stopBtn.disabled = true;
+                
+                this.stopProcessing();
+                this.showStatus('Camera stopped', 'info');
+            }
+            
+            startProcessing() {
+                if (this.processingInterval) {
+                    clearInterval(this.processingInterval);
+                }
+                
+                this.processingInterval = setInterval(() => {
+                    if (!this.isProcessing) {
+                        this.processFrame();
+                    }
+                }, 100); // Process every 100ms
+            }
+            
+            stopProcessing() {
+                if (this.processingInterval) {
+                    clearInterval(this.processingInterval);
+                    this.processingInterval = null;
+                }
+            }
+            
+            async processFrame() {
+                if (this.isProcessing || !this.video.videoWidth) return;
+                
+                this.isProcessing = true;
+                
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = this.video.videoWidth;
+                    canvas.height = this.video.videoHeight;
+                    ctx.drawImage(this.video, 0, 0);
+                    
+                    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image: imageData })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.updateDisplay(result);
+                     } else {
+                         // No hand detected, hide skeleton
+                         this.processedImage.style.display = 'none';
+                         this.skeletonPlaceholder.style.display = 'none';
+                         this.noHandMessage.style.display = 'block';
+                     }
+                } catch (error) {
+                    console.error('Error processing frame:', error);
+                } finally {
+                    this.isProcessing = false;
+                }
+            }
+            
+             updateDisplay(result) {
+                 this.characterDisplay.textContent = result.current_symbol || 'C';
+                 this.sentenceDisplay.textContent = result.sentence || ' ';
+                 
+                 // Update hand type indicator
+                 if (result.hand_type) {
+                     this.handIndicator.style.display = 'block';
+                     this.handType.textContent = result.hand_type + ' Hand';
+                     if (result.hand_type === 'Left') {
+                         this.handIndicator.classList.add('left-hand');
+                     } else {
+                         this.handIndicator.classList.remove('left-hand');
+                     }
+                 }
+                 
+                 if (result.processed_image) {
+                     this.processedImage.src = 'data:image/jpeg;base64,' + result.processed_image;
+                     this.processedImage.style.display = 'block';
+                     this.skeletonPlaceholder.style.display = 'none';
+                     this.noHandMessage.style.display = 'none';
+                 } else {
+                     this.processedImage.style.display = 'none';
+                     this.skeletonPlaceholder.style.display = 'none';
+                     this.noHandMessage.style.display = 'block';
+                     this.handIndicator.style.display = 'none';
+                 }
+                 
+                 if (result.suggestions) {
+                     result.suggestions.forEach((suggestion, index) => {
+                         if (this.suggestionBtns[index]) {
+                             this.suggestionBtns[index].textContent = suggestion || ' ';
+                             this.suggestionBtns[index].style.display = suggestion ? 'block' : 'none';
+                         }
+                     });
+                 }
+             }
+            
+            async speak() {
+                const text = this.sentenceDisplay.textContent.trim();
+                if (!text) {
+                    this.showStatus('No text to speak', 'error');
+                    return;
+                }
+                
+                try {
+                    this.showStatus('Speaking...', 'info');
+                    const response = await fetch('/speak', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: text })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.showStatus('Speaking completed', 'success');
+                    } else {
+                        this.showStatus('Error speaking: ' + result.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error speaking:', error);
+                    this.showStatus('Error speaking: ' + error.message, 'error');
+                }
+            }
+            
+            async clear() {
+                try {
+                    const response = await fetch('/clear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.sentenceDisplay.textContent = ' ';
+                        this.characterDisplay.textContent = 'C';
+                        this.suggestionBtns.forEach(btn => {
+                            btn.textContent = ' ';
+                            btn.style.display = 'none';
+                        });
+                        this.showStatus('Cleared successfully', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error clearing:', error);
+                    this.showStatus('Error clearing: ' + error.message, 'error');
+                }
+            }
+            
+            async useSuggestion(index) {
+                const suggestion = this.suggestionBtns[index].textContent.trim();
+                if (!suggestion) return;
+                
+                try {
+                    const response = await fetch('/suggestion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ suggestion: suggestion })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.sentenceDisplay.textContent = result.sentence || ' ';
+                        this.showStatus('Suggestion applied', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error applying suggestion:', error);
+                    this.showStatus('Error applying suggestion: ' + error.message, 'error');
+                }
+            }
+            
+            showStatus(message, type) {
+                this.status.textContent = message;
+                this.status.className = `status ${type}`;
+                this.status.style.display = 'block';
+                
+                // Hide status after 3 seconds
+                setTimeout(() => {
+                    this.status.style.display = 'none';
+                }, 3000);
+            }
+            
+        }
+        
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SignLanguageApp();
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</body>
+</html>
